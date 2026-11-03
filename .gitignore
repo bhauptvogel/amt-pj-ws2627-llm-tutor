@@ -1,0 +1,32 @@
+# Local-only course material: supervisor slides, recordings, transcripts.
+# Kept out of git on purpose; AGENTS.md carries the decisions that matter.
+material/
+presentations/
+
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.venv/
+.venv*/
+.python-version.bak
+
+# Tooling caches
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Secrets: API keys live in the environment, never in the repo
+.env
+.env.*
+!.env.example
+
+# Run artefacts (raw responses, judgements, reports)
+runs/
