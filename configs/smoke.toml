@@ -1,0 +1,34 @@
+# Smoke run: one prompt against one or more models.
+#
+# A run is one prompt against one model (see GLOSSARY.md), so each [[models]] entry
+# produces its own runs/<run-id>/ directory. Everything outside [[models]] is shared,
+# which keeps prompt and sampling identical across models (AGENTS invariant 2).
+#
+# Editing `system` or `user` invalidates earlier runs: bump `version` in the same edit
+# (AGENTS invariant 4).
+
+[prompt]
+id = "smoke-explain-recursion"
+version = 1
+system = "You are a patient tutor. Answer in at most three sentences."
+user = "Explain recursion to a first-year computer science student."
+
+[sampling]
+temperature = 0.0     # the default; written out so the smoke run documents itself
+max_tokens = 512
+seed = 42
+# stop = ["..."]      # omitted means the field is not sent to the provider
+
+[[models]]
+name = "oss-120b"                  # label used in the run id and the manifest
+adapter = "openai_compatible"      # adapter name in the registry
+base_url = "https://openrouter.ai/api/v1"
+model = "openai/gpt-oss-120b"      # requested model id; the reported id may differ
+api_key_env = "OPENROUTER_API_KEY" # the key itself never appears in this file
+
+[[models]]
+name = "mistral-nemo"
+adapter = "openai_compatible"
+base_url = "https://openrouter.ai/api/v1"
+model = "mistralai/mistral-nemo"
+api_key_env = "OPENROUTER_API_KEY"

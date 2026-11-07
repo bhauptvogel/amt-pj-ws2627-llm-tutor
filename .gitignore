@@ -16,6 +16,9 @@ dist/
 .venv*/
 .python-version.bak
 
+# Wayfinder maps and tickets: local planning, never published
+.wayfinder/
+
 # Tooling caches
 .pytest_cache/
 .ruff_cache/
