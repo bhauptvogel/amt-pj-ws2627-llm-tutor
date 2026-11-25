@@ -1,0 +1,25 @@
+# Cheap judge for exercising the code end to end, NOT for real judgements.
+#
+#   uv run python -m llmtutor.evaluation sanity --config configs/judge-feedback-test.toml
+#
+# A cheap model outside the tutor families (OpenAI, Mistral). Send only synthetic items
+# through it. Its labels are not validated and must never be reported as results.
+# (The free models were tried first: their per-minute limit failed nearly every call.)
+
+[judge]
+task = "feedback"
+prompt_version = 2
+criteria_per_call = "all"
+optional_criteria = []
+
+[sampling]
+temperature = 0.0
+max_tokens = 4000
+seed = 42
+
+[model]
+name = "test-judge"
+adapter = "openai_compatible"
+base_url = "https://openrouter.ai/api/v1"
+model = "google/gemini-2.5-flash-lite"
+api_key_env = "OPENROUTER_API_KEY"

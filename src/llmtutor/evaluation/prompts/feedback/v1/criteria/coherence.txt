@@ -1,0 +1,2 @@
+coherence - Is the response logically consistent with what the student actually wrote?
+  "Yes": consistent. "To some extent": minor misreadings. "No": misrepresents or contradicts the student's work.

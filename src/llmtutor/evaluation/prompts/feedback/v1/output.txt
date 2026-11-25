@@ -1,0 +1,3 @@
+## Output
+Return a single JSON object with keys in exactly this order: {top_level_keys}.
+Inside "criteria", give exactly these criteria in this order: {criteria_names}. Each criterion is an object with keys in this order: "evidence", "reasoning", "label".

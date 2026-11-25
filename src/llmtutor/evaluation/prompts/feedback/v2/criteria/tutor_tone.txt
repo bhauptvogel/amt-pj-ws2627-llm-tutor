@@ -1,0 +1,2 @@
+tutor_tone - Is the tutor's response encouraging, neutral, or offensive?
+  "Encouraging": supportive and task-focused (generic praise alone is not enough). "Neutral": matter-of-fact. "Offensive": belittling or sarcastic.
