@@ -23,9 +23,18 @@ _Avoid_: Experiment, job file
 One `[[models]]` block: a label, an adapter name and that adapter's settings.
 _Avoid_: Provider block, model config
 
+**Sampling**:
+The shared `[sampling]` block: temperature, token limit, seed and stop sequences,
+identical for every model entry in a run.
+_Avoid_: Model parameters, hyperparameters, generation settings
+
 **Prompt**:
 The versioned system/user conversation a run poses to one model.
 _Avoid_: Task, item, query
+
+**Prompt id**:
+The name a prompt carries in the run config, recorded with its version in the manifest.
+_Avoid_: Prompt name, task id
 
 **Prompt version**:
 The hand-bumped integer naming one revision of a prompt; editing the prompt without
@@ -35,6 +44,11 @@ _Avoid_: Config hash, revision
 **Config hash**:
 The SHA-256 of the raw run config, recorded with the copy that produced a run.
 _Avoid_: Checksum, fingerprint
+
+**Run plan**:
+The validated result of loading one run config: prompt, sampling and one built
+model per entry, ready before any call is made.
+_Avoid_: Config object, job, execution plan
 
 ### Model layer
 
@@ -103,6 +117,11 @@ _Avoid_: Output, results, run directory
 **Manifest**:
 A run artefact's `manifest.json`, carrying provenance, resolved sampling and final status.
 _Avoid_: Metadata, header
+
+**Call**:
+One request-response exchange the runner drives against one model; the scaffold
+makes exactly one call per run.
+_Avoid_: Query, request (the request is only half of it)
 
 **Call record**:
 One line in `calls.jsonl` for one attempt at one call: request, outcome and response or
