@@ -33,3 +33,6 @@ htmlcov/
 
 # Run artefacts (raw responses, judgements, reports)
 runs/
+
+# IDE exclude
+.idea/
