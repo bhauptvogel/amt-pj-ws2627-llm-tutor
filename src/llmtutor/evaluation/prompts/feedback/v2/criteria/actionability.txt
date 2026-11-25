@@ -1,0 +1,2 @@
+actionability - Is it clear from the feedback what the student should do next?
+  "Yes": one clear next action. "To some extent": implied or vague. "No": none.

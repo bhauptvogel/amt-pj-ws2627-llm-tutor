@@ -1,0 +1,26 @@
+# Judge config for Task 1 (feedback on a student's mistake).
+#
+#   uv run python -m llmtutor.evaluation judge --config configs/judge-feedback.toml \
+#       --responses <tutor-responses.jsonl>
+#
+# The judge model must come from a family none of the benchmarked tutors belong to, and
+# must be a dated snapshot id, never a floating alias. It is not chosen yet: replace the
+# placeholder below before the first live run. Changing it means rerunning validation.
+
+[judge]
+task = "feedback"
+prompt_version = 2           # src/llmtutor/evaluation/prompts/feedback/v2/
+criteria_per_call = "all"    # "all" (one call per response) or "one" (one call per criterion)
+optional_criteria = []       # e.g. ["human_likeness"]
+
+[sampling]
+temperature = 0.0
+max_tokens = 4000            # room for evidence and reasoning on every criterion
+seed = 42
+
+[model]
+name = "judge"
+adapter = "openai_compatible"
+base_url = "https://openrouter.ai/api/v1"
+model = "CHOOSE-A-PINNED-JUDGE-MODEL"
+api_key_env = "OPENROUTER_API_KEY"

@@ -1,0 +1,2 @@
+factual_accuracy - Are all statements in the response true? Labels: only "Yes" or "No".
+  "Yes": no false statements. "No": at least one statement is false or contradicts the reference solution (list each one in reasoning).

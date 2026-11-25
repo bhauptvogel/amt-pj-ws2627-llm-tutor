@@ -1,0 +1,3 @@
+## Step 2 - Tutoring move (diagnostic): a top-level key, NOT inside "criteria"
+tutoring_move - Which teacher move does the response mainly make? Give only one of these strings, with no evidence or reasoning.
+  "Focus": steers the student toward direct progress on the problem. "Probing": generalises or asks the student to explain or self-correct. "Telling": reveals the strategy or the answer. "Generic": greeting or general inquiry.

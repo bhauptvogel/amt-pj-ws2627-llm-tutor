@@ -1,0 +1,5 @@
+providing_guidance - Does the tutor offer correct and relevant guidance (explanation, elaboration, hint, example, question)?
+  Judge this independently of revealing_answer.
+  "Yes": guidance is correct and relevant to THIS mistake.
+  "To some extent": guidance is provided but is partially or fully incorrect, or incomplete (generic advice such as "re-read the problem" counts as incomplete).
+  "No": no guidance has been provided.
