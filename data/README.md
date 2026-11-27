@@ -1,8 +1,8 @@
 # data
 
 Datasets the benchmark evaluates on. Nothing here yet: the first pilot set arrives with
-the task layer. This file says where datasets go and what shape the files take, not which
-fields an item carries. The item schema belongs to the task that poses it.
+the task layer. This file says where datasets go, what shape the files take and which fields
+the feedback judge reads. The rest of the item schema belongs to the task that poses it.
 
 ## Layout
 
@@ -19,10 +19,10 @@ the item file.
 ## File format
 
 UTF-8, one JSON object per line, one line per item, no blank lines. `item_id` is the only
-field required by every task:
+field required by every task. A `feedback` item looks like this:
 
 ```json
-{"item_id": "fb-001", "question": "...", "student_answer": "..."}
+{"item_id": "fb-001", "question": "A shirt costs 20 euros and is reduced by 25%. What does it cost now?", "student_answer": "5 euros", "hidden_solution": "25% of 20 euros is 0.25 * 20 = 5 euros. The new price is 20 - 5 = 15 euros.", "final_answer": "15 euros", "error_note": "The student computed the discount (5 euros) but did not subtract it from the original price."}
 ```
 
 `item_id` is unique within the file and stable forever. Use a task prefix and zero-padded
@@ -31,6 +31,24 @@ number (`fb-001`, `fb-002`) so ids from different tasks never collide.
 The rest of the fields are the task's decision. The current reference shape is the
 synthetic sanity set in `src/llmtutor/evaluation/sanity/items_v1.jsonl`; it exists to test
 the judge, not to define the pilot schema.
+
+### What the feedback judge needs
+
+The evaluation layer reads these fields from every `feedback` item. The judge sees all of
+them; the tutor sees only `question`, `student_answer` and `dialogue_context`:
+
+| Field | Meaning |
+| --- | --- |
+| `question` | the problem posed to the student |
+| `student_answer` | the student's wrong answer |
+| `hidden_solution` | worked reference solution (judge only) |
+| `final_answer` | the correct final answer alone, e.g. `"15 euros"` (judge only; used to detect leaks) |
+| `error_note` | one sentence on what the mistake is and where it happens (judge only) |
+| `dialogue_context` | optional; omitted means none |
+
+A missing required field fails when the judge prompt is rendered. More examples are in
+`src/llmtutor/evaluation/sanity/items_v1.jsonl`; ignore `wrong_value` and `expert_hint`
+there, they only drive the sanity checks.
 
 ## Rules
 
