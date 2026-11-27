@@ -39,3 +39,6 @@ runs/
 
 # IDE exclude
 .idea/
+
+# Raw external datasets
+/data/raw/
