@@ -1,0 +1,2 @@
+human_likeness - Does the tutor's response sound natural rather than robotic or artificial?
+  "Yes": natural. "To some extent": partly stilted or formulaic. "No": robotic or artificial.

@@ -23,9 +23,18 @@ _Avoid_: Experiment, job file
 One `[[models]]` block: a label, an adapter name and that adapter's settings.
 _Avoid_: Provider block, model config
 
+**Sampling**:
+The shared `[sampling]` block: temperature, token limit, seed and stop sequences,
+identical for every model entry in a run.
+_Avoid_: Model parameters, hyperparameters, generation settings
+
 **Prompt**:
 The versioned system/user conversation a run poses to one model.
 _Avoid_: Task, item, query
+
+**Prompt id**:
+The name a prompt carries in the run config, recorded with its version in the manifest.
+_Avoid_: Prompt name, task id
 
 **Prompt version**:
 The hand-bumped integer naming one revision of a prompt; editing the prompt without
@@ -35,6 +44,16 @@ _Avoid_: Config hash, revision
 **Config hash**:
 The SHA-256 of the raw run config, recorded with the copy that produced a run.
 _Avoid_: Checksum, fingerprint
+
+**Dataset**:
+The versioned JSONL file a run config points at; the core reads and hashes its bytes,
+the task layer owns the item schema and loads the items.
+_Avoid_: Corpus, test set
+
+**Run plan**:
+The validated result of loading one run config: prompt, sampling, the optional dataset
+and one built model per entry, ready before any call is made.
+_Avoid_: Config object, job, execution plan
 
 ### Model layer
 
@@ -104,6 +123,11 @@ _Avoid_: Output, results, run directory
 A run artefact's `manifest.json`, carrying provenance, resolved sampling and final status.
 _Avoid_: Metadata, header
 
+**Call**:
+One request-response exchange the runner drives against one model; the scaffold
+makes exactly one call per run.
+_Avoid_: Query, request (the request is only half of it)
+
 **Call record**:
 One line in `calls.jsonl` for one attempt at one call: request, outcome and response or
 error.
@@ -126,6 +150,41 @@ _Avoid_: Backoff settings, retry config
 The manifest's state for a run: running while calls are in flight, then completed, failed,
 or aborted.
 _Avoid_: Result, exit code (that is the CLI's)
+
+### Evaluation layer
+
+**Judge**:
+A model that labels one tutor response against a rubric, using judge-only reference
+information the tutor never saw.
+_Avoid_: Grader, evaluator model, scorer (when the model itself is meant)
+
+**Rubric**:
+The versioned set of criteria one task's judge labels; changing it invalidates earlier
+judgements.
+_Avoid_: Scoring guide, metric
+
+**Criterion**:
+One question the judge and human raters answer about a tutor response, with a fixed set
+of labels.
+_Avoid_: Dimension, aspect, metric
+
+**Label**:
+One allowed answer to a criterion, written exactly as human raters write it; its position
+in the label set is its integer code.
+_Avoid_: Score, grade, rating (a rating is a rater's label)
+
+**Desired label**:
+The label a good tutor response earns on a criterion.
+_Avoid_: Target, correct label
+
+**Judgement**:
+The judge's schema-valid output for one tutor response: analysis, then evidence,
+reasoning and label per criterion.
+_Avoid_: Verdict, evaluation, score
+
+**Item-writing flaw**:
+One of 19 known defects of a multiple-choice question, checked by code or by the judge.
+_Avoid_: Error, issue
 
 ### Testing
 

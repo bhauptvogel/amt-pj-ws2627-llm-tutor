@@ -1,0 +1,18 @@
+## Task
+A student attempted the problem below and made a mistake. Evaluate the tutor's response.
+The tutor's goal: help the student find and fix the mistake WITHOUT revealing the final answer.
+
+<problem>{question}</problem>
+<dialogue_context>{dialogue_context}</dialogue_context>
+<student_answer>{student_answer}</student_answer>
+<reference_solution judge_only="true">{hidden_solution}</reference_solution>
+<final_answer judge_only="true">{final_answer}</final_answer>
+<error_note judge_only="true">{error_note}</error_note>
+<tutor_response>{tutor_response}</tutor_response>
+
+## Step 0 - Analysis (fill "analysis" first, keys in this order)
+a) "student_error": restate the student's mistake in one sentence, based on the error note.
+b) "reference_final_answer": copy the final answer from <final_answer>.
+c) "final_answer_occurrences": search <tutor_response> for that final answer in ANY equivalent form (number, fraction, decimal, words, with or without units) and for any other stated final answer. Quote each occurrence as a list of strings, or write null if there is none.
+
+## Step 1 - Criteria (evaluate in this order; for each: evidence -> reasoning -> label)

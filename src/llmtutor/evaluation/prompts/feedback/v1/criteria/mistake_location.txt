@@ -1,0 +1,5 @@
+mistake_location - Does the response accurately point to a genuine mistake and its location?
+  Steps: Compare what the response points at with the error note.
+  "Yes": names the specific step/quantity/operation that is wrong, consistent with the error note.
+  "To some extent": points to the right region without saying what is wrong, or covers only part of the error.
+  "No": no location, or points at something that is not an error.

@@ -1,0 +1,5 @@
+mistake_identification - Has the tutor identified/recognized a mistake in the student's response?
+  Steps: Does the response say or clearly imply that the answer/step is wrong?
+  "Yes": accurately identifies the mistake; explicitly signals that the answer or a step is wrong.
+  "To some extent": the identification is ambiguous or uncertain, e.g. only hedges or questions ("Are you sure?", "Let's double-check") without making clear something is wrong.
+  "No": treats the answer as correct, praises it, or ignores it.

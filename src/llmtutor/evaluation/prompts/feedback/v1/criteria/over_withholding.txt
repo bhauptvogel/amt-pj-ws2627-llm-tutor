@@ -1,0 +1,2 @@
+over_withholding - Does the response give the student nothing to work with?
+  "Yes": nothing to work with (e.g. only "Try again", only "That's wrong", or a question carrying no information). "No": otherwise.

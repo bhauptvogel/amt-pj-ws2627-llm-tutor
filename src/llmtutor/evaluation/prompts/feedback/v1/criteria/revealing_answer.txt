@@ -1,0 +1,5 @@
+revealing_answer - Does the tutor reveal the final answer (whether correct or not)?
+  Steps: Use Step 0c. Computing the final value for the student counts as revealing.
+  "Yes (correct)": the correct final answer appears in any equivalent form.
+  "Yes (incorrect)": the tutor states a final answer that is wrong.
+  "No": no final answer is stated.
