@@ -11,7 +11,7 @@ from typing import Any
 
 from llmtutor import report
 from llmtutor.config import ResolvedModel, RunPlan
-from llmtutor.types import ErrorKind, ModelError, ModelRequest, ModelResponse
+from llmtutor.types import ErrorKind, Model, ModelError, ModelRequest, ModelResponse
 
 MAX_ATTEMPTS = 3
 RETRYABLE = frozenset({ErrorKind.RATE_LIMIT, ErrorKind.TIMEOUT, ErrorKind.PROVIDER})
@@ -153,6 +153,7 @@ def _run_one(
         _finalise(
             artefact,
             manifest,
+            resolved,
             records,
             ok_count,
             error_count,
@@ -164,6 +165,7 @@ def _run_one(
         _finalise(
             artefact,
             manifest,
+            resolved,
             records,
             ok_count,
             error_count,
@@ -182,7 +184,16 @@ def _run_one(
         )
 
     status = "completed" if last_error is None else "failed"
-    _finalise(artefact, manifest, records, ok_count, error_count, status, last_error=last_error)
+    _finalise(
+        artefact,
+        manifest,
+        resolved,
+        records,
+        ok_count,
+        error_count,
+        status,
+        last_error=last_error,
+    )
 
     text = response.text if response is not None and status == "completed" else None
     return RunResult(
@@ -233,6 +244,7 @@ def _call_record(
 def _finalise(
     artefact: Path,
     manifest: dict[str, Any],
+    resolved: ResolvedModel,
     attempts: int,
     ok_count: int,
     error_count: int,
@@ -244,6 +256,9 @@ def _finalise(
     manifest["status"] = status
     manifest["finished_at"] = _iso(utcnow())
     manifest["counts"] = {"attempts": attempts, "ok": ok_count, "errors": error_count}
+    # The adapter learns the digest and daemon version on the first call, so the block is
+    # written again here, where it can carry what the run actually ran against.
+    manifest["model"] = _model_block(resolved)
     if status == "completed":
         manifest["error"] = None
     elif status == "failed" and last_error is not None:
@@ -258,18 +273,41 @@ def _finalise(
 
 
 def _model_block(resolved: ResolvedModel) -> dict[str, Any]:
-    settings = resolved.entry.settings
+    """Provenance of the call: what we asked for, every setting verbatim, and what the adapter
+    could attest about the weights behind it.
+
+    The named keys are kept because the evaluation layer reads them; `settings` carries the
+    rest, so a setting no reader knows about is recorded rather than dropped.
+    """
+
+    settings = dict(resolved.entry.settings)
     timeout_s = getattr(resolved.model, "timeout_s", None)
     if timeout_s is None:
         timeout_s = settings.get("timeout_s")
+    base_url = getattr(resolved.model, "base_url", None) or settings.get("base_url")
     return {
         "entry": resolved.entry.name,
         "adapter": resolved.entry.adapter,
         "requested_model": settings.get("model"),
-        "base_url": settings.get("base_url"),
+        "base_url": base_url,
         "api_key_env": settings.get("api_key_env"),
         "timeout_s": timeout_s,
+        "settings": settings,
+        "provenance": _provenance(resolved.model),
     }
+
+
+def _provenance(model: Model) -> dict[str, Any] | None:
+    """Whatever the adapter can attest about the weights, or None when it cannot attest."""
+
+    attested = getattr(model, "provenance", None)
+    if not callable(attested):
+        return None
+    try:
+        facts = attested()
+    except Exception:
+        return None
+    return dict(facts) if facts else None
 
 
 def _iso(value: datetime) -> str:

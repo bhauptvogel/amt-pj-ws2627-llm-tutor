@@ -5,11 +5,10 @@ import random
 from datetime import UTC, datetime
 from pathlib import Path
 
-from test_bea2025_judge import CRITERIA, SYSTEM_PROMPT
-
 from llmtutor.models.ollama import OllamaAdapter, OllamaSettings
 from llmtutor.tasks.bea2025 import load_bea2025
 from llmtutor.types import Message, ModelRequest
+from test_bea2025_judge import CRITERIA, SYSTEM_PROMPT
 
 DATASET = Path("data/pilot/bea2025_pilot20.json")
 MODEL = "qwen3:4b-instruct-2507-q4_K_M"

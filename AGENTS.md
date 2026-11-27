@@ -17,11 +17,12 @@ Option A, a single pedagogical benchmark. Group `llm-tutor`: Ben, Nermine, Simon
 Ownership means "who to ask"; never silently change another layer's rubric,
 prompt or metric.
 
-**Status:** runnable scaffold. The model layer works end to end: one
-OpenAI-compatible adapter (configured for OpenRouter), a name-based adapter
-registry, a sequential runner with retries and run artefacts, and a small CLI.
-`tasks/` and `evaluation/` are empty packages waiting for their owners; `data/`
-does not exist yet.
+**Status:** runnable scaffold. The model layer works end to end: an
+OpenAI-compatible adapter (configured for OpenRouter), a native Ollama adapter
+for local weights with a pinned context window and attested provenance, a
+name-based adapter registry, a sequential runner with retries and run artefacts,
+and a small CLI. `tasks/` and `evaluation/` are empty packages waiting for their
+owners; `data/` does not exist yet.
 
 ## Invariants
 
