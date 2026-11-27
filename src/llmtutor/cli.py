@@ -10,7 +10,7 @@ from pathlib import Path
 
 from llmtutor.config import ConfigError, load_plan
 from llmtutor.registry import RegistryError
-from llmtutor.runner import run_plan
+from llmtutor.runner import RunError, run_plan
 
 
 def load_env() -> None:
@@ -41,6 +41,9 @@ def _run(config: Path) -> int:
 
     try:
         results = run_plan(plan, Path.cwd() / "runs")
+    except RunError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 2
     except KeyboardInterrupt:
         return 130
 

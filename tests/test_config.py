@@ -82,10 +82,67 @@ def test_stop_may_be_a_single_string(tmp_path: Path) -> None:
     assert load_plan(write(tmp_path, text), {}).sampling.stop == ("END",)
 
 
+def test_dataset_is_optional(tmp_path: Path) -> None:
+    assert load_plan(write(tmp_path), {}).dataset is None
+
+
+def test_dataset_is_read_and_hashed(tmp_path: Path) -> None:
+    items = tmp_path / "items_v1.jsonl"
+    body = b'{"item_id": "fb-001"}\n'
+    items.write_bytes(body)
+
+    plan = load_plan(write(tmp_path, VALID + f'\n[dataset]\npath = "{items}"\n'), {})
+
+    assert plan.dataset is not None
+    assert plan.dataset.path == items
+    assert plan.dataset.raw == body
+    assert plan.dataset.sha256 == hashlib.sha256(body).hexdigest()
+
+
 @pytest.mark.parametrize(
     "text, message",
     [
-        ("[prompt]\nid='p'\nversion=1\nuser='u'\n[dataset]\nname='x'\n", "unknown top-level"),
+        (
+            "[prompt]\nid='p'\nversion=1\nuser='u'\n[dataset]\n",
+            "missing required key 'path'",
+        ),
+        (
+            "[prompt]\nid='p'\nversion=1\nuser='u'\n[dataset]\npath=''\n",
+            "non-empty string",
+        ),
+        (
+            "[prompt]\nid='p'\nversion=1\nuser='u'\n[dataset]\nname='x'\n",
+            "unknown key\\(s\\)",
+        ),
+        (
+            "dataset='x'\n[prompt]\nid='p'\nversion=1\nuser='u'\n",
+            "must be a table",
+        ),
+    ],
+)
+def test_invalid_dataset_blocks_are_rejected(tmp_path: Path, text: str, message: str) -> None:
+    with pytest.raises(ConfigError, match=message):
+        load_plan(write(tmp_path, text), {})
+
+
+def test_missing_dataset_file_is_a_config_error(tmp_path: Path) -> None:
+    text = VALID + f'\n[dataset]\npath = "{tmp_path / "absent.jsonl"}"\n'
+    with pytest.raises(ConfigError, match="cannot read dataset"):
+        load_plan(write(tmp_path, text), {})
+
+
+def test_empty_dataset_is_a_config_error(tmp_path: Path) -> None:
+    items = tmp_path / "empty.jsonl"
+    items.write_bytes(b"")
+    text = VALID + f'\n[dataset]\npath = "{items}"\n'
+    with pytest.raises(ConfigError, match="is empty"):
+        load_plan(write(tmp_path, text), {})
+
+
+@pytest.mark.parametrize(
+    "text, message",
+    [
+        ("[prompt]\nid='p'\nversion=1\nuser='u'\n[extra]\nfoo=1\n", "unknown top-level"),
         ("[prompt]\nid='p'\nversion=1\nuser='u'\nfoo=1\n", "unknown key"),
         ("[prompt]\nid='p'\nversion=1\n", "missing required key 'user'"),
         ("[prompt]\nid='p'\nversion=0\nuser='u'\n", "positive integer"),

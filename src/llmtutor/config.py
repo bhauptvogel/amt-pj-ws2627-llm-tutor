@@ -13,9 +13,10 @@ from typing import Any
 from llmtutor.types import Message, Model
 
 SLUG = re.compile(r"^[a-z0-9][a-z0-9_-]{0,63}$")
-TOP_LEVEL_KEYS = frozenset({"prompt", "sampling", "models"})
+TOP_LEVEL_KEYS = frozenset({"prompt", "sampling", "dataset", "models"})
 PROMPT_KEYS = frozenset({"id", "version", "system", "user"})
 SAMPLING_KEYS = frozenset({"temperature", "max_tokens", "seed", "stop"})
+DATASET_KEYS = frozenset({"path"})
 
 
 class ConfigError(Exception):
@@ -46,6 +47,20 @@ class Sampling:
 
 
 @dataclass(frozen=True, slots=True)
+class Dataset:
+    """The dataset file named by a run config, read once and hashed at load time.
+
+    Its item schema belongs to the task layer; the core only guarantees which bytes a
+    run was pointed at. A task loader reads `raw` rather than the path, so it parses
+    exactly the bytes `sha256` covers.
+    """
+
+    path: Path
+    raw: bytes
+    sha256: str
+
+
+@dataclass(frozen=True, slots=True)
 class ModelEntry:
     name: str
     adapter: str
@@ -65,6 +80,7 @@ class RunPlan:
     sha256: str
     prompt: Prompt
     sampling: Sampling
+    dataset: Dataset | None
     models: tuple[ResolvedModel, ...]
 
 
@@ -88,6 +104,7 @@ def load_plan(path: Path, environ: Mapping[str, str]) -> RunPlan:
 
     prompt = _parse_prompt(document.get("prompt"), path)
     sampling = _parse_sampling(document.get("sampling"), path)
+    dataset = _parse_dataset(document.get("dataset"), path)
     entries = _parse_models(document.get("models"), path)
 
     from llmtutor.models.registry import create_model
@@ -107,6 +124,7 @@ def load_plan(path: Path, environ: Mapping[str, str]) -> RunPlan:
         sha256=hashlib.sha256(raw).hexdigest(),
         prompt=prompt,
         sampling=sampling,
+        dataset=dataset,
         models=tuple(resolved),
     )
 
@@ -157,6 +175,29 @@ def _parse_sampling(value: Any, path: Path) -> Sampling:
         max_tokens=max_tokens,
         seed=seed,
         stop=stop,
+    )
+
+
+def _parse_dataset(value: Any, path: Path) -> Dataset | None:
+    """Read the optional [dataset] block; item shape and loading belong to the task layer."""
+
+    if value is None:
+        return None
+    if not isinstance(value, dict):
+        raise ConfigError(f"{path}: [dataset] must be a table")
+    _reject_unknown(value, DATASET_KEYS, f"{path}: [dataset]")
+
+    dataset_path = Path(_require_str(value, "path", f"{path}: [dataset]"))
+    try:
+        raw = dataset_path.read_bytes()
+    except (OSError, ValueError) as exc:
+        raise ConfigError(f"{path}: cannot read dataset {dataset_path}: {exc}") from exc
+    if not raw:
+        raise ConfigError(f"{path}: dataset {dataset_path} is empty")
+    return Dataset(
+        path=dataset_path,
+        raw=raw,
+        sha256=hashlib.sha256(raw).hexdigest(),
     )
 
 
