@@ -119,6 +119,22 @@ def test_config_error_exits_two_before_any_artefact(
     assert not (tmp_path / "runs").exists()
 
 
+def test_dataset_config_exits_two_before_any_artefact(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    items = tmp_path / "items_v1.jsonl"
+    items.write_text('{"item_id": "fb-001"}\n', encoding="utf-8")
+    config = write_config(tmp_path, "ok", extra=f'\n[dataset]\npath = "{items}"\n')
+
+    exit_code = cli.main(["run", "--config", str(config)])
+
+    captured = capsys.readouterr()
+    assert exit_code == 2
+    assert captured.out == ""
+    assert "dataset runs are not implemented yet" in captured.err
+    assert not (tmp_path / "runs").exists()
+
+
 def test_missing_config_file_exits_two(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
     exit_code = cli.main(["run", "--config", str(tmp_path / "absent.toml")])
 

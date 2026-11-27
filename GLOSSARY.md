@@ -45,9 +45,14 @@ _Avoid_: Config hash, revision
 The SHA-256 of the raw run config, recorded with the copy that produced a run.
 _Avoid_: Checksum, fingerprint
 
+**Dataset**:
+The versioned JSONL file a run config points at; the core reads and hashes its bytes,
+the task layer owns the item schema and loads the items.
+_Avoid_: Corpus, test set
+
 **Run plan**:
-The validated result of loading one run config: prompt, sampling and one built
-model per entry, ready before any call is made.
+The validated result of loading one run config: prompt, sampling, the optional dataset
+and one built model per entry, ready before any call is made.
 _Avoid_: Config object, job, execution plan
 
 ### Model layer

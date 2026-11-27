@@ -21,6 +21,10 @@ MANIFEST_VERSION = 1
 CALL_ID = "call-0001"
 
 
+class RunError(Exception):
+    """A valid plan this runner cannot execute yet."""
+
+
 def utcnow() -> datetime:
     return datetime.now(UTC)
 
@@ -39,6 +43,12 @@ class RunResult:
 
 def run_plan(plan: RunPlan, runs_root: Path) -> list[RunResult]:
     """Run every model entry in config order; a failed run does not stop its siblings."""
+
+    if plan.dataset is not None:
+        raise RunError(
+            "dataset runs are not implemented yet: the config is valid, but the runner "
+            "still makes one call per model. The task layer's item loop comes next."
+        )
 
     started = utcnow()
     stamp = started.strftime("%Y%m%dT%H%M%SZ")

@@ -36,8 +36,9 @@ the judge, not to define the pilot schema.
 
 Files are versioned by name, never edited in place once a run has used them. A real edit
 means `items_v2.jsonl` and a config pointing at the new file. The config hash covers only
-the TOML bytes, so the manifest will have to record the dataset path and hash on its own;
-the `dataset` field there is `null` today.
+the TOML bytes, so the dataset needs its own hash. It is computed when the plan loads and
+kept as `RunPlan.dataset.sha256`; the manifest does not record it yet, because dataset
+execution is not wired.
 
 Items are immutable. Correcting a typo is an edit and gets a new version; silently
 rewriting an item changes what an old run measured.
@@ -49,14 +50,25 @@ No personal data. No names, emails or student ids that identify a real person, a
 answers copied from a real student without consent. Synthetic first, real data only once
 the consent question is settled.
 
-## How configs will reference this
+## How configs reference this
 
-There is no `[dataset]` block yet. The planned shape is:
+A run config may name one dataset:
 
 ```toml
 [dataset]
 path = "data/pilot/feedback/items_v1.jsonl"
 ```
 
-Until the loader and that block exist, no code reads this directory. Adding them is a
-core change to `config.py` and `runner.py`, so it gets raised before it gets built.
+`path` is the only key. It is read as written, relative to the working directory, once
+when the plan loads. A missing or empty file is a config error. The core keeps the bytes
+and the SHA-256 in `RunPlan.dataset`, so a task loader can read `dataset.raw` instead of
+the path and parse exactly the bytes the hash covers.
+
+The item schema, the loader and the tutor prompt belong to the task layer. The core only
+guarantees which bytes a run was pointed at. The pilot is single-turn: an item poses one
+question and one student answer, and `dialogue_context` stays optional and defaults to
+`None`.
+
+The runner still makes one call per model, so a config with `[dataset]` is refused before
+any call. The item loop and the manifest entry are the next core change; until then
+`load_plan` is usable and the runner is not.

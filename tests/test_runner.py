@@ -307,6 +307,22 @@ scenario = "ok"
     assert calls(results[1].artefact)[0]["outcome"] == "ok"
 
 
+def test_dataset_runs_are_refused_until_the_item_loop(tmp_path: Path) -> None:
+    items = tmp_path / "items_v1.jsonl"
+    items.write_text('{"item_id": "fb-001"}\n', encoding="utf-8")
+    config = write_config(
+        tmp_path,
+        "ok",
+        extra=f'\n[dataset]\npath = "{items}"\n',
+    )
+    plan = load_plan(config, {})
+
+    with pytest.raises(runner.RunError, match="not implemented"):
+        runner.run_plan(plan, tmp_path / "runs")
+
+    assert not (tmp_path / "runs").exists()
+
+
 def test_calls_are_flushed_before_backoff(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     lines_at_sleep: list[int] = []
     artefact = tmp_path / "runs" / "20261107T153012Z-smoke-a"
