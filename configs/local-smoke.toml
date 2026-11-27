@@ -1,0 +1,28 @@
+# Local LLM Tutor smoke test using Ollama's native API
+
+[prompt]
+id = "local-recursion-tutor"
+version = 1
+system = "You are a patient computer science tutor. Do not immediately give away the complete answer. Ask a guiding question. Keep your response under 100 words."
+user = "A first-year student says: 'Recursion is when a function calls another function.' Help the student understand their misconception."
+
+[sampling]
+temperature = 0.0
+max_tokens = 512
+seed = 42
+
+[[models]]
+name = "qwen3-4b-local"
+adapter = "ollama"
+base_url = "http://localhost:11434"
+model = "qwen3:4b-instruct-2507-q4_K_M"
+num_ctx = 8192
+think = false
+
+[[models]]
+name = "qwen35-2b-local"
+adapter = "ollama"
+base_url = "http://localhost:11434"
+model = "qwen3.5:2b"
+num_ctx = 8192
+think = false

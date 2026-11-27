@@ -5,6 +5,10 @@ that silently truncates a long prompt is a wrong result rather than a slow one. 
 speaks `/api/chat` for that reason, and because it reports the token counts the runtime
 actually evaluated.
 
+A model entry in a run config must state `num_ctx`: a run should never inherit whatever window
+the daemon happens to pick. Constructing the adapter directly in a script may omit it and gets
+`DEFAULT_NUM_CTX`, which is what the pilot scripts did before the setting existed.
+
 Truncation is recorded, not blocked. The daemon cuts a prompt that does not fit down to
 roughly half the window and reports the tokens it really evaluated, so a truncated call is
 visible in its call record (`prompt_eval_count` in the raw payload) against the `num_ctx`
@@ -30,6 +34,7 @@ from llmtutor.types import ErrorKind, ModelError, ModelRequest, ModelResponse, U
 ALLOWED_SETTINGS = frozenset({"base_url", "model", "num_ctx", "think", "keep_alive", "timeout_s"})
 REQUIRED_SETTINGS = ("model", "num_ctx")
 DEFAULT_BASE_URL = "http://localhost:11434"
+DEFAULT_NUM_CTX = 8192
 DEFAULT_KEEP_ALIVE = "30m"
 DEFAULT_TIMEOUT_S = 300.0
 CONNECT_TIMEOUT_S = 10.0
@@ -42,7 +47,7 @@ class OllamaSettings:
 
     base_url: str
     model: str
-    num_ctx: int
+    num_ctx: int = DEFAULT_NUM_CTX
     think: bool = False
     keep_alive: str = DEFAULT_KEEP_ALIVE
     timeout_s: float = DEFAULT_TIMEOUT_S

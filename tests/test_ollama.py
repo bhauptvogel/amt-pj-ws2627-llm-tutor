@@ -9,7 +9,12 @@ import httpx
 import pytest
 
 from llmtutor.config import ConfigError
-from llmtutor.models.ollama import DEFAULT_BASE_URL, OllamaAdapter, OllamaSettings
+from llmtutor.models.ollama import (
+    DEFAULT_BASE_URL,
+    DEFAULT_NUM_CTX,
+    OllamaAdapter,
+    OllamaSettings,
+)
 from llmtutor.types import ErrorKind, Message, ModelError, ModelRequest, Usage
 
 BASE_URL = "http://daemon.test:11434"
@@ -381,6 +386,33 @@ def test_from_config_applies_the_documented_defaults() -> None:
     assert built._settings.think is False
     assert built._settings.keep_alive == "30m"
     assert built.provenance() is None
+
+
+def test_direct_construction_falls_back_to_the_default_window() -> None:
+    """A script that builds settings by hand still gets a pinned window, not the daemon's."""
+
+    seen: list[httpx.Request] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        seen.append(request)
+        table = {
+            "/api/version": ok(VERSION),
+            "/api/tags": ok(TAGS),
+            "/api/show": ok(SHOW),
+            "/api/chat": ok(CHAT),
+        }
+        return table[request.url.path]
+
+    adapter = OllamaAdapter(
+        OllamaSettings(base_url=BASE_URL, model="qwen3:8b"),
+        client=httpx.Client(transport=httpx.MockTransport(handler)),
+    )
+
+    adapter.generate(REQUEST)
+
+    sent = json.loads(next(r for r in seen if r.url.path == "/api/chat").content)
+    assert sent["options"]["num_ctx"] == DEFAULT_NUM_CTX
+    assert sent["keep_alive"] == "30m"
 
 
 def test_from_config_reads_every_setting() -> None:
