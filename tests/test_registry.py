@@ -39,7 +39,7 @@ def test_unknown_name_in_empty_registry() -> None:
 
 
 def test_builtin_and_fake_adapters_are_registered() -> None:
-    assert adapter_names() == ("fake", "openai_compatible")
+    assert adapter_names() == ("fake", "ollama", "openai_compatible")
 
 
 def test_create_model_unknown_adapter() -> None:

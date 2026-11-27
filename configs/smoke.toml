@@ -15,7 +15,7 @@ user = "Explain recursion to a first-year computer science student."
 
 [sampling]
 temperature = 0.0     # the default; written out so the smoke run documents itself
-max_tokens = 512
+max_tokens = 2048     # one budget for every entry; a thinking model spends it on reasoning too
 seed = 42
 # stop = ["..."]      # omitted means the field is not sent to the provider
 
@@ -32,3 +32,22 @@ adapter = "openai_compatible"
 base_url = "https://openrouter.ai/api/v1"
 model = "mistralai/mistral-nemo"
 api_key_env = "OPENROUTER_API_KEY"
+
+# The local arm: one set of weights, run twice with thinking on and off. The `ollama` adapter
+# refuses `:cloud` names on purpose — those run on Ollama's servers and would make the manifest
+# claim localhost falsely. `num_ctx` is pinned here because the OpenAI-compatible endpoint
+# cannot express it, and an unpinned window truncates a long prompt silently.
+
+[[models]]
+name = "qwen3-8b-think"
+adapter = "ollama"
+model = "qwen3:8b"                 # must be pulled locally: ollama pull qwen3:8b
+num_ctx = 8192
+think = true
+
+[[models]]
+name = "qwen3-8b-nothink"
+adapter = "ollama"
+model = "qwen3:8b"
+num_ctx = 8192
+think = false
